@@ -1,5 +1,5 @@
 /**
- * BrandLogo — Componente centralizado del logo oficial de SmartShopPy.
+ * BrandLogo — Componente centralizado del logo oficial de TiendaOnline.
  *
  * Responsabilidades:
  *  - Renderiza el logo oficial con proporciones correctas (object-fit: contain).

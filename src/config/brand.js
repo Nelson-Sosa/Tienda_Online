@@ -1,7 +1,7 @@
 export const BRAND = {
-  name: "SmartShopPy",
-  fullName: "SmartShopPy",
-  logo: "/SmartShopLogo1.png",
+  name: "TiendaOnline",
+  fullName: "TiendaOnline",
+  logo: "/logo.png",
   slogan: "Tu tienda, siempre al alcance.",
-  description: "SmartShopPy es un sistema de gestión para administrar tu tienda, productos, ventas e inventario.",
+  description: "TiendaOnline es un sistema de gestión para administrar tu tienda, productos, ventas e inventario.",
 };

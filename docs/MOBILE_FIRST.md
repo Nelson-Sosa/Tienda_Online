@@ -1,8 +1,8 @@
 # Prompt Profesional — Arquitectura Responsive Mobile First
 
-## Sistema: SmartShopPy
+## Sistema: TiendaOnline
 
-A partir de este momento, todo el sistema SmartShopPy debe desarrollarse siguiendo una arquitectura **Mobile First**, priorizando la experiencia de uso en teléfonos móviles y tablets.
+A partir de este momento, todo el sistema TiendaOnline debe desarrollarse siguiendo una arquitectura **Mobile First**, priorizando la experiencia de uso en teléfonos móviles y tablets.
 
 ---
 

@@ -6,7 +6,7 @@ export function CartProvider({ children }) {
   // Inicializar estado desde localStorage si existe
   const [cartItems, setCartItems] = useState(() => {
     try {
-      const savedCart = localStorage.getItem('smartshoppy_cart');
+      const savedCart = localStorage.getItem('tiendaonline_cart');
       return savedCart ? JSON.parse(savedCart) : [];
     } catch (error) {
       console.error("Error parsing cart from localStorage:", error);
@@ -16,7 +16,7 @@ export function CartProvider({ children }) {
 
   // Guardar en localStorage cada vez que cartItems cambia
   useEffect(() => {
-    localStorage.setItem('smartshoppy_cart', JSON.stringify(cartItems));
+    localStorage.setItem('tiendaonline_cart', JSON.stringify(cartItems));
   }, [cartItems]);
 
   const addToCart = useCallback((product, qty = 1) => {

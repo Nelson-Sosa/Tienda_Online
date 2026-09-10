@@ -5,7 +5,7 @@ import { Link } from "react-router-dom";
 import toast from "react-hot-toast";
 import { DEVICE_CONFIG } from "../../../constants/technicalService";
 
-const LS_KEY = "smartshoppy_repairs";
+const LS_KEY = "tiendaonline_repairs";
 
 function saveRepairToLocalStorage(result, formData) {
   try {

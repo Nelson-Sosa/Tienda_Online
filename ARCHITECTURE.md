@@ -1,4 +1,4 @@
-Reglas del proyecto — SmartShopPy
+Reglas del proyecto — TiendaOnline
 
 • Nunca crear componentes mayores a 300 líneas.
 • Cada módulo debe tener su carpeta.

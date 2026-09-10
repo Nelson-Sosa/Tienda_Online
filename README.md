@@ -1,4 +1,4 @@
-# SmartShopPy
+# TiendaOnline
 
 Sistema de gestión comercial para administrar tu tienda, productos, ventas e inventario.
 

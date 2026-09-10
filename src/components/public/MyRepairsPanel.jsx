@@ -13,7 +13,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { getTechnicalServiceByCode } from "../../services/technicalService";
 import { TECH_STATUS_CONFIG, DEVICE_CONFIG } from "../../constants/technicalService";
 
-const LS_KEY = "smartshoppy_repairs";
+const LS_KEY = "tiendaonline_repairs";
 
 function getRepairsFromStorage() {
   try {

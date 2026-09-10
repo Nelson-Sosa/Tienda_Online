@@ -36,7 +36,7 @@ jobs:
           repoToken: ${{ secrets.GITHUB_TOKEN }}
           firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
           channelId: live
-          projectId: smartshoppy-f6f3b
+          projectId: TU_NUEVO_PROJECT_ID
 
       - name: Deploy preview (PR)
         if: github.event_name == 'pull_request'
@@ -44,4 +44,4 @@ jobs:
         with:
           repoToken: ${{ secrets.GITHUB_TOKEN }}
           firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
-          projectId: smartshoppy-f6f3b
+          projectId: TU_NUEVO_PROJECT_ID
