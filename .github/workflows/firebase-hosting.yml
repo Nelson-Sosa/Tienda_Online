@@ -36,7 +36,7 @@ jobs:
           repoToken: ${{ secrets.GITHUB_TOKEN }}
           firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
           channelId: live
-          projectId: TU_NUEVO_PROJECT_ID
+          projectId: tienda-online-cf3c0
 
       - name: Deploy preview (PR)
         if: github.event_name == 'pull_request'
@@ -44,4 +44,4 @@ jobs:
         with:
           repoToken: ${{ secrets.GITHUB_TOKEN }}
           firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
-          projectId: TU_NUEVO_PROJECT_ID
+          projectId: tienda-online-cf3c0
