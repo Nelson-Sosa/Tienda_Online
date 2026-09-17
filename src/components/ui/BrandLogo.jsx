@@ -46,7 +46,7 @@ export default function BrandLogo({
       height={80}
       className={[
         "object-contain shrink-0 select-none",
-        "transition-opacity duration-200 hover:opacity-90",
+        "transition-all duration-300 hover:scale-[1.03] active:scale-[0.97] drop-shadow-sm hover:drop-shadow-md",
         sizeStyles[size] ?? sizeStyles.md,
         dark ? "brightness-0 invert" : "",
         className,
