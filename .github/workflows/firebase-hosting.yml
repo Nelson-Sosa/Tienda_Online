@@ -30,6 +30,12 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Setup environment variables
+        run: |
+          if [ -f .env.example ]; then
+            cp .env.example .env
+          fi
+
       - name: Build
         run: npm run build
 

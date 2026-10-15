@@ -22,7 +22,7 @@
 
 import { IMAGE_TRANSFORMS } from "./imageConfig";
 
-const CLOUD_NAME = import.meta.env.VITE_CLOUDINARY_CLOUD_NAME;
+const CLOUD_NAME = import.meta.env.VITE_CLOUDINARY_CLOUD_NAME || "tnygc1rd";
 const BASE_URL = `https://res.cloudinary.com/${CLOUD_NAME}/image/upload`;
 
 // ---------------------------------------------------------------------------
