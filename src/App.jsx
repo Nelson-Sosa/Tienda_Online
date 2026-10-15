@@ -28,7 +28,9 @@ const Wishlist = lazy(() => import("./pages/public/Wishlist"));
 const TechnicalServices = lazy(() => import("./pages/admin/TechnicalServices"));
 const TechnicalServiceDetail = lazy(() => import("./pages/admin/TechnicalServiceDetail"));
 const TechnicalServiceWizard = lazy(() => import("./pages/public/TechnicalService"));
+const TrackingPage = lazy(() => import("./pages/public/TechnicalService/TrackingPage"));
 const TrackingDetail = lazy(() => import("./pages/public/TechnicalService/TrackingDetail"));
+const NotFound = lazy(() => import("./pages/public/NotFound"));
 
 function PageLoader() {
   return (
@@ -84,12 +86,17 @@ function App() {
 
             <Route path="/servicio-tecnico" element={<PublicLayout />}>
               <Route index element={<TechnicalServiceWizard />} />
+              <Route path="seguimiento" element={<TrackingPage />} />
               <Route path="seguimiento/:code" element={<TrackingDetail />} />
             </Route>
 
             <Route path="/dashboard" element={<Navigate to="/admin/dashboard" replace />} />
             <Route path="/dashboard/*" element={<Navigate to="/admin/dashboard" replace />} />
-            <Route path="*" element={<Navigate to="/admin/dashboard" replace />} />
+
+            {/* Página 404 para cualquier ruta inexistente */}
+            <Route element={<PublicLayout />}>
+              <Route path="*" element={<NotFound />} />
+            </Route>
           </Routes>
             </Suspense>
           </CartProvider>

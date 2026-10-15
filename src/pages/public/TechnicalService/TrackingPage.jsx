@@ -1,16 +1,17 @@
 import { useState } from "react";
 import { Search, Loader2, ArrowRight } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { getTechnicalServiceByCode } from "../../../services/technicalService";
 
 export default function TrackingPage() {
-  const [code, setCode] = useState("");
+  const [searchParams] = useSearchParams();
+  const [code, setCode] = useState(() => (searchParams.get("code") || "").toUpperCase());
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const navigate = useNavigate();
 
   const handleSearch = async (e) => {
-    e.preventDefault();
+    if (e && e.preventDefault) e.preventDefault();
     const trimmed = code.trim().toUpperCase();
     if (!trimmed) {
       setError("Ingresá tu código de seguimiento");
@@ -27,7 +28,7 @@ export default function TrackingPage() {
       navigate(`/servicio-tecnico/seguimiento/${trimmed}`);
     } catch (err) {
       console.error(err);
-      setError("Ocurrió un error al buscar. Intentá de nuevo.");
+      setError("Ocurrió un error de conexión al buscar. Intentá de nuevo.");
     } finally {
       setLoading(false);
     }
@@ -65,7 +66,18 @@ export default function TrackingPage() {
           />
         </div>
         {error && (
-          <p className="mt-2 text-center text-sm text-danger">{error}</p>
+          <div className="mt-2 text-center">
+            <p className="text-sm text-danger">{error}</p>
+            {error.includes("error de conexión") && (
+              <button
+                type="button"
+                onClick={handleSearch}
+                className="mt-1 text-xs font-semibold text-primary hover:underline"
+              >
+                Reintentar búsqueda
+              </button>
+            )}
+          </div>
         )}
 
         <button
