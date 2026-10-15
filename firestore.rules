@@ -3,92 +3,164 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
-    // Helper: check if the user is an admin
-    function isAdmin() {
-      return request.auth != null
-        && request.auth.uid != null
-        && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
-    }
-
-    // Helper: check if the user is authenticated
+    // Helper: autenticación básica
     function isAuthenticated() {
       return request.auth != null && request.auth.uid != null;
     }
 
-    // Users collection: admin can write, owner can read their own, admin can read all
-    match /users/{userId} {
-      allow read: if isAuthenticated() && (request.auth.uid == userId || isAdmin());
-      allow create: if isAuthenticated() && request.auth.uid == userId;
-      allow update, delete: if isAuthenticated() && request.auth.uid == userId;
+    // Helper: verificación robusta de rol administrador
+    // Soporta Custom Claims (token.role == 'admin' o token.admin == true)
+    // y documentos en Firestore (/users/{uid}.data.role == 'admin') verificando existencia previa.
+    function isAdmin() {
+      return isAuthenticated() && (
+        request.auth.token.role == 'admin' ||
+        request.auth.token.admin == true ||
+        (
+          exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
+          get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin'
+        )
+      );
+    }
 
-      // Wishlist subcollection: only the owner can read/write their own wishlist
+    // ─────────────────────────────────────────────────────────────
+    // 1. Colección USERS: Perfiles, Roles y Wishlist
+    // ─────────────────────────────────────────────────────────────
+    match /users/{userId} {
+      // Lectura: el propietario lee su perfil; el administrador puede leer todos
+      allow read: if isAuthenticated() && (request.auth.uid == userId || isAdmin());
+
+      // Creación: al registrarse, el usuario solo puede crearse con role == 'user'
+      // Un administrador existente puede crear perfiles con cualquier rol
+      allow create: if isAuthenticated() && request.auth.uid == userId
+        && (request.resource.data.role == 'user' || isAdmin());
+
+      // Actualización: el usuario puede actualizar su información de perfil,
+      // pero TIENE PROHIBIDO modificar el campo 'role' (debe permanecer idéntico).
+      // Solo un administrador autenticado puede modificar roles de usuarios.
+      allow update: if isAuthenticated() && (
+        isAdmin() || (
+          request.auth.uid == userId &&
+          (
+            !('role' in request.resource.data.diff(resource.data).affectedKeys()) ||
+            request.resource.data.role == resource.data.role
+          )
+        )
+      );
+
+      // Eliminación: restringida a administradores
+      allow delete: if isAdmin();
+
+      // Subcolección Wishlist: privada del usuario
       match /wishlist/{itemId} {
         allow read, write: if isAuthenticated() && request.auth.uid == userId;
       }
     }
 
-    // Categories collection
+    // ─────────────────────────────────────────────────────────────
+    // 2. Colecciones de Catálogo: CATEGORIES y PRODUCTS
+    // ─────────────────────────────────────────────────────────────
     match /categories/{categoryId} {
-      // Any user can read categories
+      // Cualquier visitante puede leer categorías para la navegación
       allow read: if true;
-      // Only admin can create, update, delete
-      allow create: if isAdmin();
-      allow update: if isAdmin();
-      allow delete: if isAdmin();
+      // Solo administradores pueden crear, modificar o eliminar categorías
+      allow create, update, delete: if isAdmin();
     }
 
-    // Products collection
     match /products/{productId} {
+      // Cualquier visitante puede consultar productos del catálogo
       allow read: if true;
-      allow create: if isAdmin();
-      allow update: if isAdmin();
-      allow delete: if isAdmin();
+      // Solo administradores pueden crear, editar, alternar estado o eliminar productos
+      allow create, update, delete: if isAdmin();
     }
 
-    // Orders collection (POS sales + sales generated from delivered pedidos)
+    // ─────────────────────────────────────────────────────────────
+    // 3. Ventas y Pedidos: ORDERS y PEDIDOS
+    // ─────────────────────────────────────────────────────────────
     match /orders/{orderId} {
-      allow read: if isAuthenticated();
-      allow create: if isAdmin();
-      allow update: if isAdmin();
-      allow delete: if false;
+      // Registros de ventas presenciales POS y pedidos entregados: confidencial
+      allow read: if isAdmin();
+      allow create, update: if isAdmin();
+      allow delete: if false; // Inmutabilidad para auditoría contable
     }
 
-    // Pedidos collection (orders with multi-state lifecycle and stock reservation)
     match /pedidos/{pedidoId} {
-      allow read: if isAuthenticated();
-      allow create: if isAdmin();
-      allow update: if isAdmin();
-      allow delete: if false;
+      // Gestión de pedidos con ciclo de vida y reserva de stock
+      allow read: if isAdmin();
+      allow create, update: if isAdmin();
+      // Solo se permite eliminar pedidos explícitamente cancelados
+      allow delete: if isAdmin() && resource.data.status == 'cancelled';
     }
 
-    // Settings collection (for public business info like WhatsApp)
-    match /settings/{document=**} {
+    // ─────────────────────────────────────────────────────────────
+    // 4. Clientes y Finanzas: CLIENTS y GASTOS_OPERATIVOS
+    // ─────────────────────────────────────────────────────────────
+    match /clients/{clientId} {
+      // Datos personales, teléfonos y compras de clientes: solo administradores
+      allow read, write: if isAdmin();
+    }
+
+    match /gastos_operativos/{gastoId} {
+      // Gastos y costos operativos de la empresa: solo administradores
+      allow read, write: if isAdmin();
+    }
+
+    // ─────────────────────────────────────────────────────────────
+    // 5. Configuración: SETTINGS y COUNTERS
+    // ─────────────────────────────────────────────────────────────
+    match /settings/business {
+      // Información comercial pública (número de WhatsApp de contacto, nombre de fantasía)
       allow read: if true;
       allow write: if isAdmin();
     }
 
-    // Counters collection (for tracking codes, invoices, etc)
-    match /counters/{document} {
-      // Anyone can read and update counters to generate IDs
-      allow read, write: if true;
+    match /settings/{document=**} {
+      // Cualquier otra configuración interna queda protegida
+      allow read, write: if isAdmin();
     }
 
-    // Technical Services collection
+    match /counters/{document=**} {
+      // Contadores internos protegidos (elimina la vulnerabilidad pública anterior)
+      allow read, write: if isAdmin();
+    }
+
+    // ─────────────────────────────────────────────────────────────
+    // 6. Servicio Técnico: TECHNICAL_SERVICES
+    // ─────────────────────────────────────────────────────────────
     match /technical_services/{serviceId} {
-      // Anyone can create (clients without account)
-      allow create: if true;
-      // Anyone can read by their trackingCode (public query)
-      allow read: if true;
-      // Admin can update everything
-      // Client can only change quoteStatus if it's pending
+      // Creación pública: el cliente anónimo registra su equipo para reparación.
+      // Se valida que el estado inicial sea 'received' y que NO pueda inyectar
+      // presupuestos ('quote') o estados falsos.
+      allow create: if request.resource.data.status == 'received'
+        && request.resource.data.trackingCode is string
+        && request.resource.data.trackingCode.size() >= 5
+        && request.resource.data.deviceType in ['phone', 'computer']
+        && request.resource.data.customerName is string
+        && request.resource.data.customerName.size() > 0
+        && request.resource.data.customerPhone is string
+        && request.resource.data.customerPhone.size() > 0
+        && (!('quote' in request.resource.data) || request.resource.data.quote == null)
+        && (!('quoteStatus' in request.resource.data) || request.resource.data.quoteStatus == null);
+
+      // Lectura: administradores pueden listar todo el historial.
+      // El cliente público solo puede consultar su solicitud específica o búsquedas unitarias por código.
+      allow get: if true;
+      allow list: if isAdmin() || (request.query.limit != null && request.query.limit <= 2);
+
+      // Actualización: administradores pueden editar diagnóstico, cotización y estado.
+      // El cliente público solo puede aprobar o rechazar presupuestos pendientes.
       allow update: if isAdmin() || (
-        resource.data.quoteStatus == "pending"
-        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(["quoteStatus", "quoteApprovedAt", "quoteRejectedAt", "updatedAt", "status", "history"])
+        resource.data.quoteStatus == 'pending'
+        && request.resource.data.quoteStatus in ['approved', 'rejected']
+        && request.resource.data.status in ['approved', 'rejected']
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+          'quoteStatus', 'quoteApprovedAt', 'quoteRejectedAt', 'updatedAt', 'status', 'history'
+        ])
       );
-      allow delete: if false;
+
+      allow delete: if isAdmin();
     }
 
-    // Deny everything else
+    // Denegación por defecto para cualquier otra ruta
     match /{document=**} {
       allow read, write: if false;
     }
