@@ -18,11 +18,12 @@ export function AuthProvider({ children }) {
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
+      // Si estamos en medio de una operación de auth (login/register), no hacer nada
+      if (authOperationRef.current) {
+        return;
+      }
+      
       if (firebaseUser) {
-        if (authOperationRef.current) {
-          setLoading(false);
-          return;
-        }
         try {
           const userData = await getUserData(firebaseUser.uid);
           setUser(userData ? { ...firebaseUser, ...userData } : firebaseUser);
@@ -33,6 +34,7 @@ export function AuthProvider({ children }) {
       } else {
         setUser(null);
       }
+      // Solo marcar loading=false DESPUÉS de obtener userData
       setLoading(false);
     });
 
