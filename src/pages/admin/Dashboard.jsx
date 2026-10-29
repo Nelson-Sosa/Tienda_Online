@@ -33,27 +33,6 @@ function productsSummary(items) {
   return rest > 0 ? `${first} +${rest} más` : first;
 }
 
-function PaymentBadge({ method }) {
-  if (method === "transfer") {
-    return (
-      <span className="inline-flex items-center gap-1 rounded-full bg-primary-light px-2 py-0.5 text-[10px] font-medium text-primary">
-        <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-          <path strokeLinecap="round" strokeLinejoin="round" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
-        </svg>
-        Transferencia
-      </span>
-    );
-  }
-  return (
-    <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2 py-0.5 text-[10px] font-medium text-emerald-700">
-      <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-        <path strokeLinecap="round" strokeLinejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-      </svg>
-      Efectivo
-    </span>
-  );
-}
-
 function StatusBadge({ status }) {
   const cfg = STATUS_CONFIG[status] || STATUS_CONFIG.pending;
   const Icon = cfg.icon;
@@ -220,54 +199,52 @@ export default function Dashboard() {
             />
           ) : (
             <>
-              {/*
-                MOBILE / TABLET (< lg): cards apiladas, una por venta.
-                Evita el scroll horizontal y mejora la legibilidad táctil.
-              */}
+              {/* MOBILE / TABLET: cards apiladas */}
               <div className="flex flex-col divide-y divide-gray-100 p-2 xs:p-3 sm:p-4 lg:hidden">
-                {data.recentOrders.map((order) => (
-                  <div key={order.id} className="py-3 first:pt-0 last:pb-0">
-                    <OrderCard
-                      order={order}
+                {recentPedidos.map((pedido) => (
+                  <div key={pedido.id} className="py-3 first:pt-0 last:pb-0">
+                    <PedidoCard
+                      pedido={pedido}
                       onView={() => navigate("/admin/pedidos")}
                     />
                   </div>
                 ))}
               </div>
 
-              {/*
-                DESKTOP (≥ lg): tabla completa con todas las columnas.
-                Se mantiene idéntica a la versión original.
-              */}
-              <div className="hidden overflow-x-auto lg:block">
-                <table className="w-full text-left text-sm">
-                  <thead>
-                    <tr className="border-b border-border bg-gray-50/50">
-                      <th className="whitespace-nowrap px-4 py-3 text-xs font-semibold uppercase tracking-wider text-gray-500">Fecha</th>
-                      <th className="whitespace-nowrap px-4 py-3 text-xs font-semibold uppercase tracking-wider text-gray-500">Productos</th>
-                      <th className="whitespace-nowrap px-4 py-3 text-xs font-semibold uppercase tracking-wider text-gray-500">Cliente</th>
-                      <th className="whitespace-nowrap px-4 py-3 text-xs font-semibold uppercase tracking-wider text-gray-500">Pago</th>
-                      <th className="whitespace-nowrap px-4 py-3 text-xs font-semibold uppercase tracking-wider text-gray-500">Total</th>
-                      <th className="whitespace-nowrap px-4 py-3 text-xs font-semibold uppercase tracking-wider text-gray-500">Estado</th>
-                      <th className="whitespace-nowrap px-4 py-3 text-xs font-semibold uppercase tracking-wider text-gray-500">Acción</th>
+              {/* DESKTOP: tabla */}
+              <div className="hidden lg:block overflow-x-auto">
+                <table className="w-full table-auto text-left text-sm">
+                  <thead className="border-b border-gray-100 bg-gray-50/50">
+                    <tr>
+                      <th className="whitespace-nowrap px-5 py-3 text-[11px] font-semibold uppercase tracking-wider text-gray-500">Fecha</th>
+                      <th className="whitespace-nowrap px-5 py-3 text-[11px] font-semibold uppercase tracking-wider text-gray-500">Cliente</th>
+                      <th className="whitespace-nowrap px-5 py-3 text-[11px] font-semibold uppercase tracking-wider text-gray-500">Total</th>
+                      <th className="whitespace-nowrap px-5 py-3 text-[11px] font-semibold uppercase tracking-wider text-gray-500">Estado</th>
+                      <th className="whitespace-nowrap px-5 py-3 text-[11px] font-semibold uppercase tracking-wider text-gray-500"></th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-gray-100">
-                    {data.recentOrders.map((order) => (
-                      <tr key={order.id} className="transition-colors hover:bg-gray-50/50">
-                        <td className="whitespace-nowrap px-4 py-3 text-gray-700 text-xs">{formatDate(order.createdAt)}</td>
-                        <td className="max-w-[160px] truncate px-4 py-3 text-gray-700 text-xs">{productsSummary(order.items)}</td>
-                        <td className="whitespace-nowrap px-4 py-3 text-gray-500 text-xs">{order.clientName || "Cliente general"}</td>
-                        <td className="whitespace-nowrap px-4 py-3"><PaymentBadge method={order.paymentMethod} /></td>
-                        <td className="whitespace-nowrap px-4 py-3 font-semibold text-gray-800 text-xs">{formatCurrency(order.total)}</td>
-                        <td className="whitespace-nowrap px-4 py-3"><StatusBadge status={order.status} /></td>
-                        <td className="whitespace-nowrap px-4 py-3">
+                    {recentPedidos.map((pedido) => (
+                      <tr key={pedido.id} className="transition-colors hover:bg-gray-50/50">
+                        <td className="whitespace-nowrap px-5 py-3 text-xs text-gray-600">
+                          {formatDate(pedido.createdAt)}
+                        </td>
+                        <td className="whitespace-nowrap px-5 py-3 text-sm font-medium text-gray-800">
+                          {pedido.clientName || "Cliente general"}
+                        </td>
+                        <td className="whitespace-nowrap px-5 py-3 text-sm font-semibold text-gray-900">
+                          {formatCurrency(pedido.total)}
+                        </td>
+                        <td className="whitespace-nowrap px-5 py-3">
+                          <StatusBadge status={pedido.status} />
+                        </td>
+                        <td className="whitespace-nowrap px-5 py-3 text-right">
                           <button
                             onClick={() => navigate("/admin/pedidos")}
-                            className="rounded-lg p-1.5 text-gray-400 transition-colors hover:bg-primary-light hover:text-primary"
-                            title="Ver en pedidos"
+                            className="inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-medium text-primary hover:bg-primary-light"
                           >
-                            <Eye className="h-4 w-4" />
+                            <Eye className="h-3.5 w-3.5" />
+                            Ver
                           </button>
                         </td>
                       </tr>
