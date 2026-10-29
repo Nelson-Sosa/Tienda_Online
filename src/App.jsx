@@ -18,7 +18,6 @@ const Ventas = lazy(() => import("./pages/admin/Ventas"));
 const Historial = lazy(() => import("./pages/admin/Historial"));
 const Clients = lazy(() => import("./pages/admin/Clients"));
 const ClientDetail = lazy(() => import("./pages/admin/ClientDetail"));
-const GastosOperativos = lazy(() => import("./pages/admin/GastosOperativos"));
 const Pedidos = lazy(() => import("./pages/admin/Pedidos"));
 const Catalog = lazy(() => import("./pages/public/Catalog"));
 const ProductPublicDetail = lazy(() => import("./pages/public/ProductPublicDetail"));
@@ -69,7 +68,6 @@ function App() {
               <Route path="historial" element={<Historial />} />
               <Route path="clientes" element={<Clients />} />
               <Route path="clientes/:id" element={<ClientDetail />} />
-              <Route path="gastos" element={<GastosOperativos />} />
               <Route path="pedidos" element={<Pedidos />} />
               <Route path="servicio-tecnico" element={<TechnicalServices />} />
               <Route path="servicio-tecnico/:id" element={<TechnicalServiceDetail />} />

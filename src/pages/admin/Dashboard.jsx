@@ -2,15 +2,12 @@ import { useState, useEffect } from "react";
 import {
   ShoppingCart,
   TrendingUp,
-  DollarSign,
-  CreditCard,
   ShoppingBag,
   AlertTriangle,
   XCircle,
   Inbox,
   Eye,
   CreditCard as CardIcon,
-  Banknote,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import PageContainer from "../../components/layout/PageContainer";
@@ -79,14 +76,9 @@ function StatusBadge({ status }) {
 const statDefs = [
   // Rendimiento del día
   { key: "ventasDia", title: "Ventas del día", icon: ShoppingCart, accent: "primary", kind: "currency" },
-  { key: "gananciasDia", title: "Ganancias (hoy)", icon: Banknote, accent: "emerald", kind: "currency" },
-  { key: "gastosDia", title: "Gastos (hoy)", icon: CreditCard, accent: "rose", kind: "currency" },
 
   // Rendimiento acumulado
   { key: "ventasMes", title: "Ventas del mes", icon: TrendingUp, accent: "primary", kind: "currency" },
-  { key: "gananciasMes", title: "Ganancias (mes)", icon: DollarSign, accent: "emerald", kind: "currency" },
-  { key: "gastosSemana", title: "Gastos (semana)", icon: CreditCard, accent: "rose", kind: "currency" },
-  { key: "gastosMes", title: "Gastos (mes)", icon: CreditCard, accent: "rose", kind: "currency" },
 
   // Inventario
   { key: "productosVendidos", title: "Prod. vendidos (mes)", icon: ShoppingBag, accent: "primary", kind: "number" },
@@ -176,13 +168,8 @@ export default function Dashboard() {
           if (!loading && data && data.metrics) {
             const m = data.metrics;
             if (stat.key === "ventasDia") value = m.ventas.dia;
-            else if (stat.key === "gananciasDia") value = m.ganancias.dia;
-            else if (stat.key === "gastosDia") value = m.gastos.dia;
 
             else if (stat.key === "ventasMes") value = m.ventas.mes;
-            else if (stat.key === "gananciasMes") value = m.ganancias.mes;
-            else if (stat.key === "gastosSemana") value = m.gastos.semana;
-            else if (stat.key === "gastosMes") value = m.gastos.mes;
 
             else if (stat.key === "productosVendidos") value = m.inventario.productosVendidos;
             else if (stat.key === "stockBajo") value = m.inventario.stockBajo;

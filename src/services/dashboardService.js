@@ -11,7 +11,6 @@ import { db } from "../firebase/firebaseConfig";
 
 const ORDERS_COLLECTION = "orders";
 const PRODUCTS_COLLECTION = "products";
-const GASTOS_COLLECTION = "gastos_operativos";
 
 // Simple in-memory cache
 let dashboardCache = null;
@@ -58,16 +57,6 @@ async function fetchOrdersSince(since) {
   return snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
 }
 
-async function fetchGastosSince(since) {
-  const q = query(
-    collection(db, GASTOS_COLLECTION),
-    where("fecha", ">=", Timestamp.fromDate(since)),
-    orderBy("fecha", "desc")
-  );
-  const snapshot = await getDocs(q);
-  return snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
-}
-
 async function fetchAllProducts() {
   const snapshot = await getDocs(collection(db, PRODUCTS_COLLECTION));
   return snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
@@ -104,9 +93,8 @@ export async function getDashboardData(forceRefresh = false) {
   // Calculate the earliest date to fetch
   const queryStart = new Date(Math.min(weekStart.getTime(), monthStart.getTime()));
 
-  const [rawOrders, rawGastos, allProducts, recentOrders] = await Promise.all([
+  const [rawOrders, allProducts, recentOrders] = await Promise.all([
     fetchOrdersSince(queryStart),
-    fetchGastosSince(queryStart),
     fetchAllProducts(),
     fetchRecentOrders(10),
   ]);
@@ -124,51 +112,10 @@ export async function getDashboardData(forceRefresh = false) {
     if (isDateInRange(o.createdAt, monthStart, monthEnd)) ordersMonth.push(o);
   }
 
-  // Gastos splitting
-  const gastosToday = [];
-  const gastosWeek = [];
-  const gastosMonth = [];
-
-  for (const g of rawGastos) {
-    if (isDateInRange(g.fecha, todayStart, todayEnd)) gastosToday.push(g);
-    if (isDateInRange(g.fecha, weekStart, weekEnd)) gastosWeek.push(g);
-    if (isDateInRange(g.fecha, monthStart, monthEnd)) gastosMonth.push(g);
-  }
-
   // Calculations
   const ventasDiaTotal = ordersToday.reduce((sum, o) => sum + (o.total || 0), 0);
   const ventasSemanaTotal = ordersWeek.reduce((sum, o) => sum + (o.total || 0), 0);
   const ventasMesTotal = ordersMonth.reduce((sum, o) => sum + (o.total || 0), 0);
-
-  const gastosDiaTotal = gastosToday.reduce((sum, g) => sum + (g.monto || 0), 0);
-  const gastosSemanaTotal = gastosWeek.reduce((sum, g) => sum + (g.monto || 0), 0);
-  const gastosMesTotal = gastosMonth.reduce((sum, g) => sum + (g.monto || 0), 0);
-
-  const productMap = {};
-  for (const p of allProducts) {
-    productMap[p.id] = p.purchasePrice || 0;
-  }
-
-  // Costos día
-  let costosDia = 0;
-  for (const order of ordersToday) {
-    for (const item of order.items || []) {
-      const cost = productMap[item.productId] || 0;
-      costosDia += cost * (item.quantity || 0);
-    }
-  }
-
-  // Costos mes
-  let costosMes = 0;
-  for (const order of ordersMonth) {
-    for (const item of order.items || []) {
-      const cost = productMap[item.productId] || 0;
-      costosMes += cost * (item.quantity || 0);
-    }
-  }
-
-  const gananciasDia = ventasDiaTotal - gastosDiaTotal - costosDia;
-  const gananciasMes = ventasMesTotal - gastosMesTotal - costosMes;
 
   const productosVendidos = ordersMonth.reduce((sum, o) => {
     return sum + (o.items || []).reduce((s, item) => s + (item.quantity || 0), 0);
@@ -183,15 +130,6 @@ export async function getDashboardData(forceRefresh = false) {
         dia: ventasDiaTotal,
         semana: ventasSemanaTotal,
         mes: ventasMesTotal,
-      },
-      ganancias: {
-        dia: gananciasDia,
-        mes: gananciasMes,
-      },
-      gastos: {
-        dia: gastosDiaTotal,
-        semana: gastosSemanaTotal,
-        mes: gastosMesTotal,
       },
       inventario: {
         productosVendidos,

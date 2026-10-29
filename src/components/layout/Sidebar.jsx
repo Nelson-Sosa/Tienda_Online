@@ -6,7 +6,6 @@ import {
   ShoppingCart,
   History,
   Users,
-  DollarSign,
   LogOut,
   ChevronLeft,
   ChevronRight,
@@ -24,7 +23,6 @@ const mainNav = [
   { name: "Pedidos", href: "/admin/pedidos", icon: ClipboardList },
   { name: "Servicio Técnico", href: "/admin/servicio-tecnico", icon: Wrench },
   { name: "Clientes", href: "/admin/clientes", icon: Users },
-  { name: "Gastos", href: "/admin/gastos", icon: DollarSign },
   { name: "Productos", href: "/admin/productos", icon: Package },
   { name: "Categorías", href: "/admin/categorias", icon: Tags },
 ];
