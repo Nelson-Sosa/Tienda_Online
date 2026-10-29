@@ -3,7 +3,6 @@ import {
   LayoutDashboard,
   Package,
   Tags,
-  Warehouse,
   ShoppingCart,
   History,
   Users,
@@ -28,7 +27,6 @@ const mainNav = [
   { name: "Gastos", href: "/admin/gastos", icon: DollarSign },
   { name: "Productos", href: "/admin/productos", icon: Package },
   { name: "Categorías", href: "/admin/categorias", icon: Tags },
-  { name: "Inventario", href: "/admin/inventario", icon: Warehouse },
 ];
 
 
