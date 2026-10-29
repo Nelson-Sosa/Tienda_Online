@@ -215,14 +215,7 @@ export default function Dashboard() {
               icon={Inbox}
               title="No existen ventas registradas"
               description="Las ventas aparecerán aquí cuando comiences a utilizar el sistema."
-              action={
-                <button
-                  onClick={() => navigate("/admin/ventas")}
-                  className="inline-block rounded-lg bg-primary px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-primary-dark"
-                >
-                  Ir al módulo de Ventas
-                </button>
-              }
+              action={null}
             />
           ) : (
             <>

@@ -17,7 +17,7 @@ import BrandLogo from "../ui/BrandLogo";
 
 const mainNav = [
   { name: "Dashboard", href: "/admin/dashboard", icon: LayoutDashboard },
-  { name: "Ventas", href: "/admin/ventas", icon: ShoppingCart },
+
   { name: "Pedidos", href: "/admin/pedidos", icon: ClipboardList },
   { name: "Servicio Técnico", href: "/admin/servicio-tecnico", icon: Wrench },
   { name: "Clientes", href: "/admin/clientes", icon: Users },
