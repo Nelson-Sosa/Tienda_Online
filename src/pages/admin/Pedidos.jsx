@@ -754,9 +754,13 @@ export default function Pedidos() {
   const [loading, setLoading] = useState(true);
   const [lastDoc, setLastDoc] = useState(null);
   const [hasMore, setHasMore] = useState(false);
-  const [page, setPage] = useState(1);
   const [statusFilter, setStatusFilter] = useState("all");
   const [summary, setSummary] = useState(null);
+  
+  // Nuevos filtros de la Etapa 1
+  const [dateFrom, setDateFrom] = useState("");
+  const [dateTo, setDateTo] = useState("");
+  const [searchQuery, setSearchQuery] = useState("");
 
   const [selectedPedido, setSelectedPedido] = useState(null);
   const [deliverTarget, setDeliverTarget] = useState(null);
@@ -773,6 +777,8 @@ export default function Pedidos() {
       try {
         const result = await pedidoService.getPedidos({
           statusFilter,
+          dateFrom: dateFrom ? new Date(dateFrom) : null,
+          dateTo: dateTo ? new Date(dateTo + "T23:59:59.999") : null,
           pageSize: PAGE_SIZE,
           lastDoc: cursor,
         });
@@ -783,7 +789,6 @@ export default function Pedidos() {
         }
         setLastDoc(result.lastDoc);
         setHasMore(result.hasMore);
-        if (reset) setPage(1);
       } catch (err) {
         console.error("Error de Firestore:", err); // Asegura que el link del índice se muestre en consola
         const msg = err?.message || "";
@@ -796,7 +801,7 @@ export default function Pedidos() {
         setLoading(false);
       }
     },
-    [statusFilter],
+    [statusFilter, dateFrom, dateTo],
   );
 
   const loadSummary = useCallback(async () => {
@@ -812,9 +817,50 @@ export default function Pedidos() {
   useEffect(() => { loadPedidos(true); }, [loadPedidos]);
   useEffect(() => { loadSummary(); }, [loadSummary]);
 
+  // Búsqueda en cliente (no en Firestore) - por nombre de cliente o ID de pedido
+  const filteredPedidos = useMemo(() => {
+    let result = pedidos;
+    
+    // Primero filtrar por estado (si no es "all")
+    if (statusFilter !== "all") {
+      result = result.filter((p) => p.status === statusFilter);
+    }
+    
+    // Luego filtrar por búsqueda de texto
+    if (searchQuery.trim()) {
+      const queryLower = searchQuery.trim().toLowerCase();
+      result = result.filter(pedido => {
+        // Buscar en nombre de cliente
+        if (pedido.clientName && pedido.clientName.toLowerCase().includes(queryLower)) {
+          return true;
+        }
+        // Buscar en ID de pedido (primeros caracteres)
+        if (pedido.id.toLowerCase().includes(queryLower)) {
+          return true;
+        }
+        return false;
+      });
+    }
+    
+    return result;
+  }, [pedidos, statusFilter, searchQuery]);
+
   function refresh() {
     loadPedidos(true);
     loadSummary();
+  }
+
+  function handleClearFilters() {
+    setDateFrom("");
+    setDateTo("");
+    setSearchQuery("");
+    setStatusFilter("all");
+  }
+
+  function handleLoadMore() {
+    if (hasMore && lastDoc) {
+      loadPedidos(false, lastDoc);
+    }
   }
 
   async function handleStatusChange(pedido, newStatus) {
@@ -893,11 +939,6 @@ export default function Pedidos() {
     }
   }
 
-  const filteredPedidos = useMemo(() => {
-    if (statusFilter === "all") return pedidos;
-    return pedidos.filter((p) => p.status === statusFilter);
-  }, [pedidos, statusFilter]);
-
   return (
     <PageContainer title="Pedidos" description="Gestión de pedidos con reserva de stock">
       {/* Summary stats */}
@@ -961,6 +1002,74 @@ export default function Pedidos() {
             {tab.label}
           </button>
         ))}
+      </div>
+
+      {/* Nuevos filtros de fecha y búsqueda */}
+      <div className="mb-6 rounded-xl bg-white p-4 shadow-sm ring-1 ring-border">
+        <div className="flex flex-wrap items-end gap-4">
+          {/* Filtro de fechas */}
+          <div className="flex-1 min-w-[200px]">
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label className="mb-1 block text-xs font-semibold text-gray-500">
+                  Desde
+                </label>
+                <input
+                  type="date"
+                  value={dateFrom}
+                  onChange={(e) => setDateFrom(e.target.value)}
+                  className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:border-primary focus:ring-2 focus:ring-primary/20"
+                />
+              </div>
+              <div>
+                <label className="mb-1 block text-xs font-semibold text-gray-500">
+                  Hasta
+                </label>
+                <input
+                  type="date"
+                  value={dateTo}
+                  onChange={(e) => setDateTo(e.target.value)}
+                  className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:border-primary focus:ring-2 focus:ring-primary/20"
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* Búsqueda por cliente o ID */}
+          <div className="flex-1 min-w-[250px]">
+            <label className="mb-1 block text-xs font-semibold text-gray-500">
+              Buscar cliente o número de pedido
+            </label>
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
+              <input
+                type="text"
+                placeholder="Nombre de cliente o ID..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full rounded-lg border border-gray-200 py-2 pl-10 pr-3 text-sm focus:border-primary focus:ring-2 focus:ring-primary/20"
+              />
+            </div>
+          </div>
+
+          {/* Botones de acción */}
+          <div className="flex items-center gap-2">
+            <button
+              onClick={refresh}
+              className="rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-white hover:bg-primary-dark"
+            >
+              Aplicar filtros
+            </button>
+            {(dateFrom || dateTo || searchQuery || statusFilter !== "all") && (
+              <button
+                onClick={handleClearFilters}
+                className="rounded-lg border border-gray-200 px-4 py-2 text-sm font-medium text-gray-600 hover:bg-gray-50"
+              >
+                Limpiar
+              </button>
+            )}
+          </div>
+        </div>
       </div>
 
       {/* Desktop Table */}
@@ -1055,17 +1164,11 @@ export default function Pedidos() {
           </div>
         )}
 
-        {filteredPedidos.length > 0 && (
-          <div className="flex items-center justify-between border-t border-border px-4 py-3">
-            <p className="text-sm text-gray-500">Página {page}</p>
-            <div className="flex gap-2">
-              <button onClick={() => { if (page > 1) setPage((p) => p - 1); }} disabled={page <= 1} className="flex items-center gap-1 rounded-lg border border-gray-200 px-3 py-1.5 text-sm text-gray-600 hover:bg-gray-50 disabled:opacity-40">
-                <ChevronLeft className="h-4 w-4" /> Anterior
-              </button>
-              <button onClick={() => { if (hasMore && lastDoc) { setPage((p) => p + 1); loadPedidos(false, lastDoc); } }} disabled={!hasMore} className="flex items-center gap-1 rounded-lg border border-gray-200 px-3 py-1.5 text-sm text-gray-600 hover:bg-gray-50 disabled:opacity-40">
-                Siguiente <ChevronRight className="h-4 w-4" />
-              </button>
-            </div>
+        {filteredPedidos.length > 0 && hasMore && (
+          <div className="flex items-center justify-center border-t border-border px-4 py-4">
+            <button onClick={handleLoadMore} className="rounded-lg bg-primary px-6 py-2.5 text-sm font-semibold text-white hover:bg-primary-dark">
+              Cargar más pedidos
+            </button>
           </div>
         )}
       </div>
@@ -1127,6 +1230,15 @@ export default function Pedidos() {
               </div>
             );
           })
+        )}
+
+        {/* Mobile pagination */}
+        {filteredPedidos.length > 0 && hasMore && (
+          <div className="flex items-center justify-center pt-4 pb-2">
+            <button onClick={handleLoadMore} className="rounded-lg bg-primary px-6 py-2.5 text-sm font-semibold text-white hover:bg-primary-dark">
+              Cargar más
+            </button>
+          </div>
         )}
       </div>
 

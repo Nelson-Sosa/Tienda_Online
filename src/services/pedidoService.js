@@ -398,14 +398,34 @@ export async function getPedidoById(id) {
   return { id: snap.id, ...snap.data() };
 }
 
-export async function getPedidos({ statusFilter = null, pageSize = 30, lastDoc = null } = {}) {
+export async function getPedidos({ 
+  statusFilter = null, 
+  dateFrom = null, 
+  dateTo = null,
+  pageSize = 30, 
+  lastDoc = null 
+} = {}) {
   const constraints = [];
 
   if (statusFilter && statusFilter !== "all") {
     constraints.push(where("status", "==", statusFilter));
   }
 
+  if (dateFrom) {
+    const ts = dateFrom instanceof Timestamp ? dateFrom : Timestamp.fromDate(dateFrom);
+    constraints.push(where("createdAt", ">=", ts));
+  }
+  
+  if (dateTo) {
+    const ts = dateTo instanceof Timestamp ? dateTo : Timestamp.fromDate(dateTo);
+    constraints.push(where("createdAt", "<=", ts));
+  }
+
+  // Ordenar siempre por fecha descendente para paginación
+  // IMPORTANTE: Para filtros combinados necesitamos índice compuesto
+  // Sugerencia de índice: status + createdAt (desc)
   constraints.push(orderBy("createdAt", "desc"));
+  
   constraints.push(limit(pageSize + 1));
   if (lastDoc) constraints.push(startAfter(lastDoc));
 
