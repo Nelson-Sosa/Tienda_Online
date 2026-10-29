@@ -334,7 +334,7 @@ async function _deliverPedido(pedidoId, paymentMethod, userId) {
       clientId: pedido.clientId || null,
       clientName: pedido.clientName || null,
       status: "completed",
-      pedidoId: pedidoId, // back-reference so Historial can trace origin
+      pedidoId: pedidoId, // back-reference to track order origin
       createdBy: userId,
       createdAt: serverTimestamp(),
     });

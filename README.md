@@ -19,7 +19,6 @@ Sistema de gestión comercial para administrar tu tienda, productos, ventas e in
 |--------|-------------|
 | Dashboard | Resumen de ventas, pedidos y métricas del negocio |
 | Ventas | Punto de venta (POS) |
-| Historial | Historial de transacciones |
 | Pedidos | Gestión de pedidos con ciclo de vida completo |
 | Clientes | Gestión de clientes |
 | Gastos Operativos | Control de gastos del negocio |

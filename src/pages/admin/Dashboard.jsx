@@ -121,7 +121,7 @@ function OrderCard({ order, onView }) {
         <button
           onClick={onView}
           className="flex items-center gap-1.5 rounded-lg bg-primary-light px-3 py-1.5 text-xs font-medium text-primary transition-colors hover:bg-primary hover:text-white"
-          title="Ver en historial"
+          title="Ver en pedidos"
         >
           <Eye className="h-3.5 w-3.5" />
           Ver
@@ -198,7 +198,7 @@ export default function Dashboard() {
           description={
             hasRecentOrders
               ? `${data.recentOrders.length} ventas recientes`
-              : "Historial de transacciones recientes"
+              : "Transacciones recientes"
           }
         />
 
@@ -235,7 +235,7 @@ export default function Dashboard() {
                   <div key={order.id} className="py-3 first:pt-0 last:pb-0">
                     <OrderCard
                       order={order}
-                      onView={() => navigate("/admin/historial")}
+                      onView={() => navigate("/admin/pedidos")}
                     />
                   </div>
                 ))}
@@ -269,9 +269,9 @@ export default function Dashboard() {
                         <td className="whitespace-nowrap px-4 py-3"><StatusBadge status={order.status} /></td>
                         <td className="whitespace-nowrap px-4 py-3">
                           <button
-                            onClick={() => navigate("/admin/historial")}
+                            onClick={() => navigate("/admin/pedidos")}
                             className="rounded-lg p-1.5 text-gray-400 transition-colors hover:bg-primary-light hover:text-primary"
-                            title="Ver en historial"
+                            title="Ver en pedidos"
                           >
                             <Eye className="h-4 w-4" />
                           </button>

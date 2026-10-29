@@ -4,7 +4,6 @@ import {
   Package,
   Tags,
   ShoppingCart,
-  History,
   Users,
   LogOut,
   ChevronLeft,
@@ -19,7 +18,6 @@ import BrandLogo from "../ui/BrandLogo";
 const mainNav = [
   { name: "Dashboard", href: "/admin/dashboard", icon: LayoutDashboard },
   { name: "Ventas", href: "/admin/ventas", icon: ShoppingCart },
-  { name: "Historial", href: "/admin/historial", icon: History },
   { name: "Pedidos", href: "/admin/pedidos", icon: ClipboardList },
   { name: "Servicio Técnico", href: "/admin/servicio-tecnico", icon: Wrench },
   { name: "Clientes", href: "/admin/clientes", icon: Users },

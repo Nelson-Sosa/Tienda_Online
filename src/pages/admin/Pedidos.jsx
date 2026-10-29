@@ -262,7 +262,7 @@ function DeliverConfirmModal({ pedido, onConfirm, onClose, delivering }) {
           </div>
           <h3 className="mt-4 text-lg font-bold text-gray-800">Confirmar entrega</h3>
           <p className="mt-2 text-sm text-gray-600 leading-relaxed">
-            Esta acción descontará el stock definitivamente y generará una venta en el Historial.
+            Esta acción descontará el stock definitivamente y generará una venta registrada.
           </p>
         </div>
 
@@ -884,7 +884,7 @@ export default function Pedidos() {
         paymentMethod,
         userId: user?.uid,
       });
-      toast.success("Pedido entregado ✓ — Venta registrada en Historial");
+      toast.success("Pedido entregado ✓ — Venta registrada correctamente");
       setPedidos((prev) =>
         prev.map((p) => p.id === deliverTarget.id ? { ...p, status: "delivered", paymentMethod } : p),
       );

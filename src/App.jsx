@@ -15,7 +15,6 @@ const Products = lazy(() => import("./pages/admin/Products"));
 const ProductDetail = lazy(() => import("./pages/admin/ProductDetail"));
 const Categories = lazy(() => import("./pages/admin/Categories"));
 const Ventas = lazy(() => import("./pages/admin/Ventas"));
-const Historial = lazy(() => import("./pages/admin/Historial"));
 const Clients = lazy(() => import("./pages/admin/Clients"));
 const ClientDetail = lazy(() => import("./pages/admin/ClientDetail"));
 const Pedidos = lazy(() => import("./pages/admin/Pedidos"));
@@ -65,7 +64,7 @@ function App() {
               <Route path="productos/:id" element={<ProductDetail />} />
               <Route path="categorias" element={<Categories />} />
               <Route path="ventas" element={<Ventas />} />
-              <Route path="historial" element={<Historial />} />
+              <Route path="historial" element={<Navigate to="/admin/pedidos" replace />} />
               <Route path="clientes" element={<Clients />} />
               <Route path="clientes/:id" element={<ClientDetail />} />
               <Route path="pedidos" element={<Pedidos />} />
