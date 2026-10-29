@@ -62,9 +62,9 @@ async function fetchAllProducts() {
   return snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
 }
 
-async function fetchRecentOrders(limitCount = 10) {
+async function fetchRecentPedidos(limitCount = 5) {
   const q = query(
-    collection(db, ORDERS_COLLECTION),
+    collection(db, "pedidos"),
     orderBy("createdAt", "desc"),
     limit(limitCount)
   );
@@ -93,10 +93,10 @@ export async function getDashboardData(forceRefresh = false) {
   // Calculate the earliest date to fetch
   const queryStart = new Date(Math.min(weekStart.getTime(), monthStart.getTime()));
 
-  const [rawOrders, allProducts, recentOrders] = await Promise.all([
+  const [rawOrders, allProducts, recentPedidos] = await Promise.all([
     fetchOrdersSince(queryStart),
     fetchAllProducts(),
-    fetchRecentOrders(10),
+    fetchRecentPedidos(5),
   ]);
 
   const activeOrders = filterActive(rawOrders);
@@ -137,7 +137,7 @@ export async function getDashboardData(forceRefresh = false) {
         agotados,
       },
     },
-    recentOrders,
+    recentPedidos,
     allProducts,
   };
 

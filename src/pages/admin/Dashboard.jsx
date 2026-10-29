@@ -1,22 +1,19 @@
 import { useState, useEffect } from "react";
 import {
-  ShoppingCart,
-  TrendingUp,
-  ShoppingBag,
   AlertTriangle,
   XCircle,
   Inbox,
   Eye,
-  CreditCard as CardIcon,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import PageContainer from "../../components/layout/PageContainer";
 import StatCard from "../../components/ui/StatCard";
 import SectionHeader from "../../components/ui/SectionHeader";
 import EmptyState from "../../components/ui/EmptyState";
-
+import { STATUS_CONFIG } from "../../constants/pedidoStatus";
 import { formatCurrency } from "../../utils/formatCurrency";
 import { getDashboardData } from "../../services/dashboardService";
+import { getPedidosSummary } from "../../services/pedidoService";
 
 function formatDate(ts) {
   if (!ts) return "—";
@@ -58,65 +55,46 @@ function PaymentBadge({ method }) {
 }
 
 function StatusBadge({ status }) {
-  const isCancelled = (status || "completed") === "cancelled";
-  if (isCancelled) {
-    return (
-      <span className="inline-flex items-center gap-1 rounded-full bg-danger/10 px-2 py-0.5 text-[10px] font-medium text-danger">
-        Anulada
-      </span>
-    );
-  }
+  const cfg = STATUS_CONFIG[status] || STATUS_CONFIG.pending;
+  const Icon = cfg.icon;
   return (
-    <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2 py-0.5 text-[10px] font-medium text-emerald-700">
-      Completada
+    <span className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-medium ring-1 ${cfg.color}`}>
+      <Icon className="h-3 w-3" />
+      {cfg.label}
     </span>
   );
 }
 
-const statDefs = [
-  // Rendimiento del día
-  { key: "ventasDia", title: "Ventas del día", icon: ShoppingCart, accent: "primary", kind: "currency" },
-
-  // Rendimiento acumulado
-  { key: "ventasMes", title: "Ventas del mes", icon: TrendingUp, accent: "primary", kind: "currency" },
-
-  // Inventario
-  { key: "productosVendidos", title: "Prod. vendidos (mes)", icon: ShoppingBag, accent: "primary", kind: "number" },
-  { key: "stockBajo", title: "Stock bajo", icon: AlertTriangle, accent: "rose", kind: "number" },
-  { key: "agotados", title: "Productos agotados", icon: XCircle, accent: "danger", kind: "number" },
-];
-
 // ---------------------------------------------------------------------------
-// Vista mobile de orden — card apilada por fila
+// Vista mobile de pedido — card apilada por fila
 // ---------------------------------------------------------------------------
-function OrderCard({ order, onView }) {
+function PedidoCard({ pedido, onView }) {
   return (
     <div className="flex flex-col gap-2 xs:gap-3 rounded-xl border border-border bg-white p-3 xs:p-4 shadow-sm">
       {/* Fila 1: fecha + estado */}
       <div className="flex items-center justify-between gap-2">
         <span className="text-xs font-medium text-gray-500">
-          {formatDate(order.createdAt)}
+          {formatDate(pedido.createdAt)}
         </span>
-        <StatusBadge status={order.status} />
+        <StatusBadge status={pedido.status} />
       </div>
 
       {/* Fila 2: productos */}
       <p className="truncate text-sm font-semibold text-gray-800">
-        {productsSummary(order.items)}
+        {productsSummary(pedido.items)}
       </p>
 
-      {/* Fila 3: cliente + método de pago */}
+      {/* Fila 3: cliente */}
       <div className="flex items-center justify-between gap-2">
         <span className="truncate text-xs text-gray-500">
-          {order.clientName || "Cliente general"}
+          {pedido.clientName || "Cliente general"}
         </span>
-        <PaymentBadge method={order.paymentMethod} />
       </div>
 
       {/* Fila 4: total + acción */}
       <div className="flex items-center justify-between border-t border-border pt-3">
         <span className="text-sm font-bold text-gray-800">
-          {formatCurrency(order.total)}
+          {formatCurrency(pedido.total)}
         </span>
         <button
           onClick={onView}
@@ -133,71 +111,94 @@ function OrderCard({ order, onView }) {
 
 export default function Dashboard() {
   const navigate = useNavigate();
-  const [data, setData] = useState(null);
+  const [inventoryData, setInventoryData] = useState(null);
+  const [pedidosStats, setPedidosStats] = useState(null);
+  const [recentPedidos, setRecentPedidos] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     let cancelled = false;
     setLoading(true);
-    getDashboardData()
-      .then((result) => {
-        if (!cancelled) setData(result);
+    
+    Promise.all([
+      getDashboardData(),
+      getPedidosSummary(),
+    ])
+      .then(([dashData, pedSummary]) => {
+        if (!cancelled) {
+          setInventoryData(dashData?.metrics?.inventario || null);
+          setPedidosStats(pedSummary);
+          setRecentPedidos(dashData?.recentPedidos || []);
+        }
       })
       .catch(() => {
-        if (!cancelled) setData(null);
+        if (!cancelled) {
+          setInventoryData(null);
+          setPedidosStats(null);
+          setRecentPedidos([]);
+        }
       })
       .finally(() => {
         if (!cancelled) setLoading(false);
       });
+    
     return () => { cancelled = true; };
   }, []);
 
-  const hasRecentOrders = data?.recentOrders && data.recentOrders.length > 0;
+  const hasRecentPedidos = recentPedidos && recentPedidos.length > 0;
 
   return (
     <PageContainer title="Dashboard" description="Resumen general del negocio">
 
       {/* ------------------------------------------------------------------ */}
-      {/* Stat cards                                                          */}
+      {/* Stat cards: Pedidos + Stock                                         */}
       {/* Mobile: 2 columnas | Tablet: 3 columnas | Desktop: 4 columnas      */}
       {/* ------------------------------------------------------------------ */}
-      <div className="grid grid-cols-1 xs:grid-cols-2 gap-3 sm:gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-        {statDefs.map((stat) => {
-          let value = null;
-
-          if (!loading && data && data.metrics) {
-            const m = data.metrics;
-            if (stat.key === "ventasDia") value = m.ventas.dia;
-
-            else if (stat.key === "ventasMes") value = m.ventas.mes;
-
-            else if (stat.key === "productosVendidos") value = m.inventario.productosVendidos;
-            else if (stat.key === "stockBajo") value = m.inventario.stockBajo;
-            else if (stat.key === "agotados") value = m.inventario.agotados;
+      <div className="grid grid-cols-1 xs:grid-cols-2 gap-3 sm:gap-4 md:grid-cols-2 lg:grid-cols-4">
+        <StatCard
+          title="Pendientes"
+          icon={STATUS_CONFIG.pending.icon}
+          accent="amber"
+          kind="number"
+          value={loading ? null : pedidosStats?.pending ?? 0}
+        />
+        <StatCard
+          title="En preparación"
+          icon={STATUS_CONFIG.in_progress.icon}
+          accent="blue"
+          kind="number"
+          value={loading ? null : pedidosStats?.inProgress ?? 0}
+        />
+        <StatCard
+          title="Entregados"
+          icon={STATUS_CONFIG.delivered.icon}
+          accent="emerald"
+          kind="number"
+          value={loading ? null : pedidosStats?.delivered ?? 0}
+        />
+        <StatCard
+          title="Stock bajo"
+          subtitle={
+            loading || !inventoryData
+              ? undefined
+              : `${inventoryData.agotados || 0} agotados`
           }
-
-          return (
-            <StatCard
-              key={stat.key}
-              title={stat.title}
-              icon={stat.icon}
-              accent={stat.accent}
-              kind={stat.kind}
-              value={loading ? null : value}
-            />
-          );
-        })}
+          icon={AlertTriangle}
+          accent="rose"
+          kind="number"
+          value={loading ? null : inventoryData?.stockBajo ?? 0}
+        />
       </div>
 
       {/* ------------------------------------------------------------------ */}
-      {/* Últimas ventas                                                      */}
+      {/* Pedidos recientes                                                   */}
       {/* ------------------------------------------------------------------ */}
       <div className="mt-6 sm:mt-8">
         <SectionHeader
-          title="Últimas ventas"
+          title="Pedidos recientes"
           description={
-            hasRecentOrders
-              ? `${data.recentOrders.length} ventas recientes`
+            hasRecentPedidos
+              ? `${recentPedidos.length} pedidos recientes`
               : "Transacciones recientes"
           }
         />

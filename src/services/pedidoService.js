@@ -20,20 +20,11 @@ import {
   getProductRef,
 } from "./stockUtils";
 import { clearDashboardCache } from "./dashboardService";
+import { PEDIDO_STATUS } from "../constants/pedidoStatus";
 
 const PEDIDOS_COLLECTION = "pedidos";
 const ORDERS_COLLECTION = "orders";
 const CLIENTS_COLLECTION = "clients";
-
-// ─────────────────────────────────────────────────────────────
-//  VALID STATES
-// ─────────────────────────────────────────────────────────────
-export const PEDIDO_STATUS = {
-  PENDING: "pending",
-  IN_PROGRESS: "in_progress",
-  DELIVERED: "delivered",
-  CANCELLED: "cancelled",
-};
 
 // ─────────────────────────────────────────────────────────────
 //  CREATE PEDIDO
@@ -442,17 +433,30 @@ export async function getPedidos({
   };
 }
 
+/**
+ * Get summary counts for pedidos dashboard cards.
+ * NO caching - always fresh data for real-time status.
+ */
 export async function getPedidosSummary() {
-  const q = query(
+  // Active pedidos (pending + in_progress)
+  const activeQ = query(
     collection(db, PEDIDOS_COLLECTION),
     where("status", "in", [PEDIDO_STATUS.PENDING, PEDIDO_STATUS.IN_PROGRESS])
   );
-  const snapshot = await getDocs(q);
-  const active = snapshot.docs.map((d) => ({ id: d.id, ...d.data() }));
+  const activeSnapshot = await getDocs(activeQ);
+  const active = activeSnapshot.docs.map((d) => ({ id: d.id, ...d.data() }));
+
+  // All delivered pedidos (no date filter)
+  const deliveredQ = query(
+    collection(db, PEDIDOS_COLLECTION),
+    where("status", "==", PEDIDO_STATUS.DELIVERED)
+  );
+  const deliveredSnapshot = await getDocs(deliveredQ);
 
   return {
     pending: active.filter((p) => p.status === PEDIDO_STATUS.PENDING).length,
     inProgress: active.filter((p) => p.status === PEDIDO_STATUS.IN_PROGRESS).length,
+    delivered: deliveredSnapshot.docs.length,
     total: active.length,
   };
 }

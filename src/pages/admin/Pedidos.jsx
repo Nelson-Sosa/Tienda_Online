@@ -4,8 +4,6 @@ import {
   Search,
   Eye,
   X,
-  CheckCircle2,
-  XCircle,
   Clock,
   Loader2,
   Package,
@@ -19,6 +17,8 @@ import {
   Ban,
   FileText,
   RefreshCw,
+  CheckCircle2,
+  XCircle,
 } from "lucide-react";
 import toast from "react-hot-toast";
 import * as pedidoService from "../../services/pedidoService";
@@ -31,6 +31,7 @@ import EmptyState from "../../components/ui/EmptyState";
 import StatCard from "../../components/ui/StatCard";
 import { useAuth } from "../../context/AuthContext";
 import { useProducts } from "../../hooks/useProducts";
+import { PEDIDO_STATUS, STATUS_CONFIG } from "../../constants/pedidoStatus";
 
 const PAGE_SIZE = 20;
 
@@ -78,30 +79,8 @@ function parseStockError(msg) {
 }
 
 // ─────────────────────────────────────────────────────────────
-//  Status Badge
+//  Status Badge - uses shared config
 // ─────────────────────────────────────────────────────────────
-const STATUS_CONFIG = {
-  pending: {
-    label: "Pendiente",
-    color: "bg-amber-50 text-amber-700 ring-amber-200",
-    icon: Clock,
-  },
-  in_progress: {
-    label: "En preparación",
-    color: "bg-blue-50 text-blue-700 ring-blue-200",
-    icon: Loader2,
-  },
-  delivered: {
-    label: "Entregado",
-    color: "bg-emerald-50 text-emerald-700 ring-emerald-200",
-    icon: CheckCircle2,
-  },
-  cancelled: {
-    label: "Cancelado",
-    color: "bg-red-50 text-red-600 ring-red-200",
-    icon: XCircle,
-  },
-};
 
 function StatusBadge({ status }) {
   const cfg = STATUS_CONFIG[status] || STATUS_CONFIG.pending;
@@ -941,7 +920,7 @@ export default function Pedidos() {
 
   return (
     <PageContainer title="Pedidos" description="Gestión de pedidos con reserva de stock">
-      {/* Summary stats */}
+      {/* Summary stats - 4 cards */}
       <div className="mb-6 grid grid-cols-2 gap-4 sm:grid-cols-4">
         <StatCard
           icon={Clock}
@@ -953,6 +932,12 @@ export default function Pedidos() {
           icon={Loader2}
           title="En preparación"
           value={summary?.inProgress ?? "—"}
+          kind="number"
+        />
+        <StatCard
+          icon={CheckCircle2}
+          title="Entregados"
+          value={summary?.delivered ?? "—"}
           kind="number"
         />
         <StatCard
