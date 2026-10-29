@@ -211,7 +211,7 @@ export default function Dashboard() {
                 <div key={i} className="h-12 animate-pulse rounded-lg bg-gray-100" />
               ))}
             </div>
-          ) : !hasRecentOrders ? (
+          ) : !hasRecentPedidos ? (
             <EmptyState
               icon={Inbox}
               title="No existen ventas registradas"
