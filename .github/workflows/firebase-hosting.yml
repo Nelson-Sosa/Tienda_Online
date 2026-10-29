@@ -41,17 +41,16 @@ jobs:
 
       - name: Deploy to production (main)
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-        uses: FirebaseExtended/action-hosting-deploy@v0
-        with:
-          repoToken: ${{ secrets.GITHUB_TOKEN }}
-          firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
-          channelId: live
-          projectId: tienda-online-cf3c0
+        env:
+          FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}
+        run: |
+          npx firebase-tools deploy --only hosting --project tienda-online-cf3c0 --token "$FIREBASE_TOKEN"
+          echo "✅ Deploy completado en: https://tienda-online-cf3c0.web.app"
 
       - name: Deploy preview (PR)
         if: github.event_name == 'pull_request'
-        uses: FirebaseExtended/action-hosting-deploy@v0
-        with:
-          repoToken: ${{ secrets.GITHUB_TOKEN }}
-          firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
-          projectId: tienda-online-cf3c0
+        env:
+          FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}
+        run: |
+          npx firebase-tools deploy --only hosting --project tienda-online-cf3c0 --token "$FIREBASE_TOKEN" --non-interactive
+          echo "✅ Preview deploy completado"
