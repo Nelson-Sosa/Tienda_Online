@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
@@ -16,7 +16,7 @@ const loginSchema = z.object({
 export default function Login() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isGoogleSubmitting, setIsGoogleSubmitting] = useState(false);
-  const { login, loginWithGoogle } = useAuth();
+  const { user, login, loginWithGoogle } = useAuth();
   const navigate = useNavigate();
 
   const {
@@ -26,6 +26,13 @@ export default function Login() {
   } = useForm({
     resolver: zodResolver(loginSchema),
   });
+
+  // Si ya hay una sesión de admin activa, redirigir al panel
+  useEffect(() => {
+    if (user?.role === "admin") {
+      navigate("/admin/dashboard", { replace: true });
+    }
+  }, [user, navigate]);
 
   async function onSubmit(data) {
     setIsSubmitting(true);

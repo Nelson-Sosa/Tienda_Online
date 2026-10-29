@@ -1,5 +1,5 @@
 import { Outlet, Link, useLocation, useNavigate, useSearchParams } from "react-router-dom";
-import { LogIn, LogOut, ShoppingCart, Heart, Search } from "lucide-react";
+import { LogIn, LogOut, ShoppingCart, Heart, Search, LayoutDashboard } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useState } from "react";
 import { useCart } from "../../context/CartContext";
@@ -12,7 +12,6 @@ import MobileMenuDrawer from "./catalog/MobileMenuDrawer";
 import MyRepairsPanel from "./MyRepairsPanel";
 import BrandLogo from "../ui/BrandLogo";
 import Footer from "./Footer";
-import { BRAND } from "../../config/brand";
 
 export default function PublicLayout() {
   const location = useLocation();
@@ -143,6 +142,15 @@ export default function PublicLayout() {
                 <div className="flex h-9 w-9 sm:h-10 sm:w-10 shrink-0 items-center justify-center rounded-full bg-primary text-sm font-bold text-white shadow-sm">
                   {userInitial}
                 </div>
+                {user.role === "admin" && (
+                  <Link
+                    to="/admin/dashboard"
+                    className="inline-flex shrink-0 items-center gap-1.5 rounded-xl border border-border bg-white px-3 py-2 text-sm font-medium text-gray-600 shadow-sm transition-all hover:border-primary hover:text-primary hover:shadow-md"
+                  >
+                    <LayoutDashboard className="h-4 w-4" />
+                    <span className="hidden sm:inline">Panel</span>
+                  </Link>
+                )}
                 <button
                   onClick={handleLogout}
                   className="hidden md:inline-flex shrink-0 items-center gap-1.5 rounded-xl border border-border bg-white px-4 py-2 text-sm font-medium text-gray-600 shadow-sm transition-all hover:border-danger hover:text-danger hover:shadow-md"
