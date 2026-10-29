@@ -1,6 +1,6 @@
 # TiendaOnline
 
-Sistema de gestión comercial para administrar tu tienda, productos, ventas e inventario.
+Tienda online de electrónicos con catálogo público, sistema de pedidos y panel de administración.
 
 ## Stack
 
@@ -18,7 +18,6 @@ Sistema de gestión comercial para administrar tu tienda, productos, ventas e in
 | Módulo | Descripción |
 |--------|-------------|
 | Dashboard | Resumen de ventas, pedidos y métricas del negocio |
-| Ventas | Punto de venta (POS) |
 | Pedidos | Gestión de pedidos con ciclo de vida completo |
 | Clientes | Gestión de clientes |
 | Gastos Operativos | Control de gastos del negocio |

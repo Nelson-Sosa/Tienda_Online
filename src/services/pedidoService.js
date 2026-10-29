@@ -164,7 +164,7 @@ export async function createPedido({
  * pending/in_progress → delivered: atomic delivery (see _deliverPedido)
  *
  * A pedido that is already "delivered" or "cancelled" cannot be transitioned
- * here. Use cancelOrder() in orderService to annul a delivered sale.
+ * here. Annulling a delivered sale is not currently implemented.
  */
 export async function updatePedidoStatus(pedidoId, newStatus, { paymentMethod, userId } = {}) {
   if (!Object.values(PEDIDO_STATUS).includes(newStatus)) {
@@ -349,7 +349,7 @@ async function _deliverPedido(pedidoId, paymentMethod, userId) {
       updatedAt: serverTimestamp(),
     });
 
-    // ── Step 7: Update client stats (identical to POS createOrder flow) ───
+    // ── Step 7: Update client stats (purchases and total spent) ───
     if (clientSnap?.exists()) {
       const clientData = clientSnap.data();
       const clientUpdates = {
