@@ -18,8 +18,13 @@ export default function CatalogHero() {
     >
       {/* Imagen de Publicidad */}
       <img 
-        src="/electronica.png" 
-        alt="Ofertas Especiales" 
+        srcSet="/electronica-640.webp 640w, /electronica-960.webp 960w, /electronica-1280.webp 1280w"
+        sizes="(max-width: 768px) 100vw, 983px"
+        src="/electronica-960.webp"
+        alt="Ofertas Especiales"
+        width="1843"
+        height="853"
+        fetchPriority="high"
         className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 group-hover:scale-105" 
       />
       
