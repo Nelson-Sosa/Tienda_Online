@@ -36,8 +36,8 @@ export default function ProductCard({ product, onEdit, onToggleStatus, onDelete,
         </div>
 
         <div className="min-w-0 flex-1">
-          <div className="flex items-start justify-between gap-2">
-            <p className="truncate text-sm font-semibold text-gray-800">
+          <div className="flex flex-wrap items-start gap-2">
+            <p className="break-words text-sm font-semibold text-gray-800 [overflow-wrap:anywhere] flex-1 min-w-0">
               {product.name}
             </p>
             <ProductStatusBadge status={product.status} />

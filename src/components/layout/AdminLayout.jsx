@@ -8,7 +8,7 @@ export default function AdminLayout() {
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
 
   return (
-    <div className="flex h-screen overflow-hidden bg-background-secondary">
+    <div className="flex h-screen w-full overflow-hidden bg-background-secondary">
       <Sidebar
         collapsed={sidebarCollapsed}
         mobileOpen={mobileSidebarOpen}
