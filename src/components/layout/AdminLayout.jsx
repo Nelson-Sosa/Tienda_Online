@@ -1,11 +1,20 @@
-import { useState } from "react";
-import { Outlet } from "react-router-dom";
+import { useState, useEffect, useRef } from "react";
+import { Outlet, useLocation } from "react-router-dom";
 import Sidebar from "./Sidebar";
 import Topbar from "./Topbar";
 
 export default function AdminLayout() {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
+  const mainRef = useRef(null);
+  const location = useLocation();
+
+  // Scroll al inicio del contenedor admin cuando cambia pathname
+  useEffect(() => {
+    if (mainRef.current) {
+      mainRef.current.scrollTo({ top: 0, left: 0, behavior: "instant" });
+    }
+  }, [location.pathname]);
 
   return (
     <div className="flex h-screen w-full overflow-hidden bg-background-secondary">
@@ -23,7 +32,7 @@ export default function AdminLayout() {
       >
         <Topbar onMenuClick={() => setMobileSidebarOpen(true)} />
 
-        <main className="min-w-0 flex-1 overflow-y-auto p-4 lg:p-8">
+        <main ref={mainRef} className="min-w-0 flex-1 overflow-y-auto p-4 lg:p-8">
           <Outlet />
         </main>
       </div>

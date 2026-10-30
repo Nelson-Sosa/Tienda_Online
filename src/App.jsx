@@ -5,6 +5,7 @@ import { AuthProvider } from "./context/AuthContext";
 import { CartProvider } from "./context/CartContext";
 import { WishlistProvider } from "./context/WishlistContext";
 import AdminRoute from "./routes/AdminRoute";
+import ScrollToTop from "./components/ScrollToTop";
 
 const AdminLayout = lazy(() => import("./components/layout/AdminLayout"));
 const PublicLayout = lazy(() => import("./components/public/PublicLayout"));
@@ -40,6 +41,7 @@ function PageLoader() {
 function App() {
   return (
     <BrowserRouter>
+      <ScrollToTop />
       <AuthProvider>
         <WishlistProvider>
           <CartProvider>
