@@ -55,18 +55,18 @@ export default function ProductTable({ products, onEdit, onToggleStatus, onDelet
                         </div>
                       )}
                     </div>
-                    <div className="min-w-0">
-                      <p className="truncate font-medium text-gray-800 max-w-[200px]">
+                    <div className="min-w-0 flex-1">
+                      <p className="truncate font-medium text-gray-800">
                         {prod.name}
                       </p>
                       {prod.sku && (
-                        <p className="text-xs text-gray-400">SKU: {prod.sku}</p>
+                        <p className="truncate text-xs text-gray-400">SKU: {prod.sku}</p>
                       )}
                     </div>
                   </div>
                 </td>
                 <td className="px-4 py-3.5">
-                  <span className="text-gray-600">{prod.categoryName}</span>
+                  <span className="truncate text-gray-600">{prod.categoryName}</span>
                 </td>
                 <td className="px-4 py-3.5 font-medium text-gray-800">
                   {formatCurrency(prod.salePrice)}

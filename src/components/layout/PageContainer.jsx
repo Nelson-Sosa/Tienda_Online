@@ -1,10 +1,10 @@
 export default function PageContainer({ title, description, children }) {
   return (
-    <div className="mx-auto max-w-7xl">
+    <div className="mx-auto min-w-0 max-w-7xl">
       {(title || description) && (
         <div className="mb-6 sm:mb-8">
           {title && (
-            <h1 className="text-xl font-bold text-gray-800 sm:text-2xl">
+            <h1 className="truncate text-xl font-bold text-gray-800 sm:text-2xl">
               {title}
             </h1>
           )}

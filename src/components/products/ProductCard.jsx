@@ -42,7 +42,7 @@ export default function ProductCard({ product, onEdit, onToggleStatus, onDelete,
             </p>
             <ProductStatusBadge status={product.status} />
           </div>
-          <p className="mt-0.5 text-xs text-gray-500">{product.categoryName}</p>
+          <p className="mt-0.5 truncate text-xs text-gray-500">{product.categoryName}</p>
           <div className="mt-2 flex items-center gap-3">
             <span className="text-sm font-semibold text-gray-800">
               {formatCurrency(product.salePrice)}
@@ -63,20 +63,20 @@ export default function ProductCard({ product, onEdit, onToggleStatus, onDelete,
         </div>
       </div>
 
-      <div className="flex items-center gap-1 border-t border-border px-3 py-2">
+      <div className="flex flex-wrap items-center gap-1 border-t border-border px-3 py-2">
         <button
           onClick={() => onViewDetail(product)}
           className="flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs font-medium text-gray-500 transition-colors hover:bg-sky-50 hover:text-sky-600"
         >
           <Search className="h-3.5 w-3.5" />
-          Detalle
+          <span className="hidden xs:inline">Detalle</span>
         </button>
         <button
           onClick={() => onEdit(product)}
           className="flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs font-medium text-gray-500 transition-colors hover:bg-primary-light hover:text-primary"
         >
           <Pencil className="h-3.5 w-3.5" />
-          Editar
+          <span className="hidden xs:inline">Editar</span>
         </button>
         <button
           onClick={() => onToggleStatus(product)}
@@ -87,14 +87,14 @@ export default function ProductCard({ product, onEdit, onToggleStatus, onDelete,
           ) : (
             <Eye className="h-3.5 w-3.5" />
           )}
-          {product.status === "active" ? "Desactivar" : "Activar"}
+          <span className="hidden xs:inline">{product.status === "active" ? "Desactivar" : "Activar"}</span>
         </button>
         <button
           onClick={() => onDelete(product)}
           className="flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs font-medium text-gray-500 transition-colors hover:bg-red-50 hover:text-red-500"
         >
           <Trash2 className="h-3.5 w-3.5" />
-          Eliminar
+          <span className="hidden xs:inline">Eliminar</span>
         </button>
       </div>
     </div>
